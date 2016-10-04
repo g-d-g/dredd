@@ -1,26 +1,41 @@
 sudo: false
 language: python
 before_install:
-- node --version
-- npm install --python=python2 -g dredd
-- bundle install
-python:
-- '2.7'
-- '3.2'
-- '3.3'
-- '3.4'
-- '3.5'
+  - >-
+    curl -X POST -H "Content-Type: application/json" -H "Authorization: token
+    $GH_TOKEN" -d "{\"state\":\"pending\",\"description\":\"Dependent build
+    created\",\"context\":\"continuous-integration/travis-ci/python-hooks-handler\",\"target_url\":\"https://travis-ci.org/apiaryio/dredd/builds/$TRAVIS_BUILD_ID\"}"
+    'https://api.github.com/repos/apiaryio/dredd/statuses/38edf15f849dc7ea7a1ce68a9341971fe5efb844'
+  - npm install -g npm@latest
+  - node --version
+  - npm link --python=python2 ./__dredd__
+  - bundle install
+python: '3.5'
 script:
-- python -B -m unittest discover
-- pip install -e .
-- bundle exec cucumber
-deploy:
-  provider: pypi
-  distributions: sdist
-  user: apiaryio
-  password:
-    secure: brE9tMvyld8s56TSFs3uXZTHZPmjXzLMs6nGPqy5QAchicE79DWqk27i+0kOs4FVVmY1L3dutU7cFIN41KoSRKvUUnFOIVgCMRHOYGJcaQtEA8Z9L7R79EOks3w/pmTevd5a98tYdHC7h0v4RYT6qT+4CobVZg1TLdzikeWRKEDjt+UphxkJlq0SPxIoW4Wcz0uoM4iO/gsgiZFviDDaMmzSHynzGg/aFqKQkgzJxZG4hZKsbTmFFp7utOZmZ/NcF7kECZ5UmRhdzfg7HQMZpcvpsFskv80b9I8aKK/IlwDZHJYQWyBeY5ihI9bwq7/jpRVeVOCyuNQiWbGew74Ju3JIikK+n5KTCyW23OLjASAHyey+KLwQyXAD4X2p9QnBMzRY50DfM0KmqhZ1kNQ+AJrBPRMTQTejAYfb9kXPHtRpXgyXiLiSI36kcYJAi5uQrmVaIvhndQERgGGHZWWjGkVz768ovR+m3s8WerZUzKzONDQ5o045fVLg/tpOmrSSZySdW4Z1wlZ4xImklMw2CB2+2yTUUku18dge4fwZShCgs6rVQF7ewRqRrnpdw+ifP+e2s3EnD3HcHLcBt0Q6WvUQ6qEYV4ba5BhynnzIUuJOYOmV43oeAsYjLw/In4MKoSltCTo5GcqEsCNWSNcNLjGTDNOhk6kFpd8hZXWyi2g=
-  on:
-    python: '3.5'
-    tags: true
-    repo: apiaryio/dredd-hooks-python
+  - python -B -m unittest discover
+  - pip install -e .
+  - bundle exec cucumber
+env:
+  global:
+    secure: >-
+      I5fsJ/vsp/IA+016GtlP7FcOazlm7ZJRbAHeAXUS6Nhob1LHvDpTPQ45jEPykaO8c9RHluCSe1ziOYNnixJeittL5qVFv4oXWh73t8hKOkLtVQxLrfludF8a6rLMvKmPe/Kzu4B1Zim1uaDwVZT8fUObg4XxyqIp+B81wM0NbvM=
+after_failure:
+  - >-
+    curl -X POST -H "Content-Type: application/json" -H "Authorization: token
+    $GH_TOKEN" -d "{\"state\":\"error\",\"description\":\"Dependent build
+    finished\",\"context\":\"continuous-integration/travis-ci/python-hooks-handler\",\"target_url\":\"https://travis-ci.org/apiaryio/dredd/builds/$TRAVIS_BUILD_ID\"}"
+    'https://api.github.com/repos/apiaryio/dredd/statuses/38edf15f849dc7ea7a1ce68a9341971fe5efb844'
+after_success:
+  - >-
+    curl -X POST -H "Content-Type: application/json" -H "Authorization: token
+    $GH_TOKEN" -d "{\"state\":\"success\",\"description\":\"Dependent build
+    finished\",\"context\":\"continuous-integration/travis-ci/python-hooks-handler\",\"target_url\":\"https://travis-ci.org/apiaryio/dredd/builds/$TRAVIS_BUILD_ID\"}"
+    'https://api.github.com/repos/apiaryio/dredd/statuses/38edf15f849dc7ea7a1ce68a9341971fe5efb844'
+  - >-
+    if [[ $TRAVIS_BRANCH = master ]]; then echo "Deleting aborted (master)" &&
+    exit 1; fi
+  - git branch -D $TRAVIS_BRANCH
+  - >-
+    git remote set-url origin "https://$GH_TOKEN@github.com/apiaryio/dredd.git"
+    > /dev/null 2>&1
+  - git push origin -f --delete $TRAVIS_BRANCH > /dev/null 2>&1
