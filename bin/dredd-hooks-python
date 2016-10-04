@@ -1,0 +1,13 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#
+#  Copyright (c) 2015, 2016 Apiary Czech Republic, s.r.o.
+#  License: MIT
+#
+from __future__ import print_function
+import sys
+import dredd_hooks as dredd
+
+
+if __name__ == '__main__':
+    dredd.main(sys.argv[1:])
