@@ -1,12 +1,13 @@
 var hooks = require('hooks');
-var url = require('url');
-var qs = require('querystring');
+var tokenPattern = /([0-9]|[a-f]){24,}/g;
 
-hooks.after('Resource > Update Resource', function(transaction, done) {
-  var urlParts = url.parse(transaction.test.request.uri);
-  var parameters = qs.parse(urlParts.query);
-  delete parameters.token;
-  urlParts.query = parameters;
-  transaction.test.request.uri = url.format(urlParts);
+hooks.beforeEach(function(transaction, done) {
+  transaction.id = transaction.id.replace(tokenPattern, 'CENSORED');
+  transaction.origin.resourceName = transaction.origin.resourceName.replace(tokenPattern, 'CENSORED');
+  done();
+});
+
+hooks.afterEach(function(transaction, done) {
+  transaction.test.request.uri = transaction.test.request.uri.replace(tokenPattern, 'CENSORED');
   done();
 });

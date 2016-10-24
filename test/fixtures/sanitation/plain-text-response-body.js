@@ -1,5 +1,5 @@
 var hooks = require('hooks');
-var tokenPattern = /([0-9]|[a-f]){32,}/;
+var tokenPattern = /([0-9]|[a-f]){24,}/g;
 
 hooks.after('Resource > Update Resource', function(transaction, done) {
   var body;
@@ -12,4 +12,5 @@ hooks.after('Resource > Update Resource', function(transaction, done) {
 
   // sanitation of diff in the patch format
   delete transaction.test.results.body.results.rawData;
+  done();
 });

@@ -1,10 +1,10 @@
 var hooks = require('hooks');
-var tokenPattern = /([0-9]|[a-f]){32,}/;
+var tokenPattern = /([0-9]|[a-f]){24,}/g;
 
-hooks.after('Resource > Update Resource', function(transaction, done) {
+hooks.afterEach(function(transaction, done) {
   var test = JSON.stringify(transaction.test, function(key, value) {
     if (value.replace) {
-      return value.replace(tokenPattern, '--- CENSORED ---');
+      return value.replace(tokenPattern, 'CENSORED');
     }
     return value;
   });
